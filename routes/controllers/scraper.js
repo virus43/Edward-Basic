@@ -57,6 +57,7 @@ module.exports = {
                         info
                     }
                 });
+                browser.close();
                 console.log(scrapedData);
                 scrapedData.doc = scrapedData.doc.split("Perform another Company-CIK Lookup")[0];
                 
