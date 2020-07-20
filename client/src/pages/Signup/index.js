@@ -11,7 +11,7 @@ class Signup extends Component {
 		super(props);
 		this.state = {
 			email: '',
-			username: '',
+			firstname: '',
 			password: '',
 			passwordConf: ''
 		};
@@ -43,11 +43,11 @@ class Signup extends Component {
       // set error alert to user
       return this.props.setAlertInfo({theme:"warning", message:"Your password fields do not match."})
     }
-
+	console.log(this.state.firstname, "this is the name before this")
     // if good to go
 		userAPI
 				.signup({
-					firstname: this.state.username.trim(),
+					firstname: this.state.firstname.trim(),
 					email: this.state.email.trim(),
 					password: this.state.password.trim(),
 					passwordConf: this.state.passwordConf.trim()
@@ -89,10 +89,10 @@ class Signup extends Component {
 						<Card title='Create Your Account'>
 							<form className={styles.form} onSubmit={this.handleFormSubmit}>
 								<Input
-									value={this.state.username}
+									value={this.state.firstname}
 									onChange={this.handleInputChange}
-									name='username'
-									placeholder='Username (Required)'
+									name='firstname'
+									placeholder='First Name (Required)'
 								/>
 								<Input
 									value={this.state.email}
