@@ -12,7 +12,12 @@ module.exports = {
 
 	try {
 		(async () => {
-			const browser = await puppeteer.launch();
+			const browser = await puppeteer.launch({
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                  ],
+                });
 			const page = await browser.newPage();
 			await page.goto('https://www.sec.gov/Archives/edgar/data/'+req.body.cik+'/index.json');
 
@@ -143,6 +148,7 @@ module.exports = {
 
             
             console.log('done');
+            res.json('done');
 
 		})();
 	} catch (err) {
@@ -193,5 +199,49 @@ module.exports = {
         }
 
 
+    },
+    getLatest: (req,res) => {
+        console.log('reached backend of get latest');
+        try {
+            (async () => {
+                const browser = await puppeteer.launch({
+                    args: [
+                        '--no-sandbox',
+                        '--disable-setuid-sandbox',
+                      ],
+                    });
+                const page = await browser.newPage();
+                await page.goto('https://www.sec.gov/edgar/searchedgar/currentevents.htm');
+                await page.type('#q3', '10-Q');
+                page.keyboard.press('Enter');
+                await page.waitForSelector('table');
+                var scrapedData = await page.evaluate (() => {
+                    let doc = document.querySelector('table').innerText;
+                    return {
+                        doc
+                    };
+                });
+                browser.close();
+                scrapedData.doc = scrapedData.doc.split("Company Name")[1];
+                scrapedData.doc = scrapedData.doc.split("Perform another current events analysis?")[0];
+
+                var latestFilingList  = scrapedData.doc.split(/\n/).slice(2,-2);
+
+                let data = [];
+                for (var i = 0; i < latestFilingList.length; i++) {
+                    var split = latestFilingList[i].split("10-Q");
+                    if (split[1].includes('/A')) {
+                        split[1]=split[1].replace('/A','');
+                    }
+                    split[1]= split[1].trim();
+                    doubleSplit = split[1].split('   ');
+                    data.push({id:i, dateFiled:split[0].trim(), cik: doubleSplit[0], companyName: doubleSplit[1]});
+                }
+                console.log(data);   
+                res.json(data);
+            })();
+        } catch (err) {
+            console.log(err);
+        }
     }
 };
